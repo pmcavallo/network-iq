@@ -30,3 +30,11 @@
 - **Sprint 2:** Baselines (XGBoost congestion, ARIMA/Prophet trend), SHAP + PSI
 
 > This repo is structured for clean, interview‑ready artifacts (PRD, KPIs, model card) plus runnable code.
+>
+> ## Quickstart (Windows)
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+streamlit run streamlit_app.py
