@@ -1375,49 +1375,49 @@ _render_topk_map()
 
 
 # --- Deployment diagnostics (sidebar) ---
-import os
-import streamlit as st
+# import os
+# import streamlit as st
 
-def _mask(v: str) -> str:
-    if not v:
-        return "not set"
-    return (v[:4] + "…" + v[-4:]) if len(v) >= 8 else "set"
+# def _mask(v: str) -> str:
+#     if not v:
+#         return "not set"
+#     return (v[:4] + "…" + v[-4:]) if len(v) >= 8 else "set"
 
-with st.sidebar.expander("Deployment diagnostics"):
-    g_key = os.getenv("GOOGLE_API_KEY")
-    o_key = os.getenv("OPENAI_API_KEY")
-    active = "GOOGLE" if g_key else ("OPENAI" if o_key else None)
+# with st.sidebar.expander("Deployment diagnostics"):
+#     g_key = os.getenv("GOOGLE_API_KEY")
+#     o_key = os.getenv("OPENAI_API_KEY")
+#     active = "GOOGLE" if g_key else ("OPENAI" if o_key else None)
 
-    st.write("**Env vars**")
-    st.write(f"GOOGLE_API_KEY: {_mask(g_key)}")
-    st.write(f"OPENAI_API_KEY: {_mask(o_key)}")
-    st.caption("Only one should be set. If both are set, the app may behave unpredictably.")
+#     st.write("**Env vars**")
+#     st.write(f"GOOGLE_API_KEY: {_mask(g_key)}")
+#     st.write(f"OPENAI_API_KEY: {_mask(o_key)}")
+#     st.caption("Only one should be set. If both are set, the app may behave unpredictably.")
 
-    if st.button("Run provider test"):
-        try:
-            if active == "GOOGLE":
-                import google.generativeai as genai
-                genai.configure(api_key=g_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
-                resp = model.generate_content(
-                    "Reply with just: OK",
-                    generation_config={"max_output_tokens": 2}
-                )
-                st.success(f"Google GenAI OK: {resp.text.strip() if hasattr(resp, 'text') else 'OK'}")
-            elif active == "OPENAI":
-                # Only runs if you set OPENAI_API_KEY instead of GOOGLE_API_KEY
-                from openai import OpenAI
-                client = OpenAI(api_key=o_key)
-                msg = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role":"user", "content":"Reply with just: OK"}],
-                    max_tokens=2
-                )
-                st.success(f"OpenAI OK: {msg.choices[0].message.content.strip()}")
-            else:
-                st.error("No provider key found. Set GOOGLE_API_KEY or OPENAI_API_KEY in Render → Environment.")
-        except Exception as e:
-            st.error(f"Provider test failed: {type(e).__name__}: {e}")
-            st.caption("Check the key value, project access, or model name. Also see Render logs.")
+#     if st.button("Run provider test"):
+#         try:
+#             if active == "GOOGLE":
+#                 import google.generativeai as genai
+#                 genai.configure(api_key=g_key)
+#                 model = genai.GenerativeModel("gemini-1.5-flash")
+#                 resp = model.generate_content(
+#                     "Reply with just: OK",
+#                     generation_config={"max_output_tokens": 2}
+#                 )
+#                 st.success(f"Google GenAI OK: {resp.text.strip() if hasattr(resp, 'text') else 'OK'}")
+#             elif active == "OPENAI":
+#                 # Only runs if you set OPENAI_API_KEY instead of GOOGLE_API_KEY
+#                 from openai import OpenAI
+#                 client = OpenAI(api_key=o_key)
+#                 msg = client.chat.completions.create(
+#                     model="gpt-4o-mini",
+#                     messages=[{"role":"user", "content":"Reply with just: OK"}],
+#                     max_tokens=2
+#                 )
+#                 st.success(f"OpenAI OK: {msg.choices[0].message.content.strip()}")
+#             else:
+#                 st.error("No provider key found. Set GOOGLE_API_KEY or OPENAI_API_KEY in Render → Environment.")
+#         except Exception as e:
+#             st.error(f"Provider test failed: {type(e).__name__}: {e}")
+#             st.caption("Check the key value, project access, or model name. Also see Render logs.")
 
 
