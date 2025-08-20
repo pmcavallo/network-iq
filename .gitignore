@@ -10,6 +10,7 @@ venv/
 
 # Data & artifacts
 data/curated/*
+!data/curated/parquet/
 !data/curated/parquet/**
 mlruns/
 .DS_Store
