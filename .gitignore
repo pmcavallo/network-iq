@@ -9,7 +9,7 @@ env/
 venv/
 
 # Data & artifacts
-data/curated/
+data/curated/*
 !data/curated/parquet/**
 mlruns/
 .DS_Store
