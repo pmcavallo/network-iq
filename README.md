@@ -1,6 +1,6 @@
 # Network IQ — Responsible AI for Telco Performance
 
-**Goal:** Ship a Verizon‑aligned MVP that turns network telemetry into *faster incident detection (MTTD↓)*, *better customer experience (NPS proxy↑)*, and *leaner cost/GB* — with responsible AI baked in.
+**Goal:** Ship a telecom‑aligned MVP that turns network telemetry into *faster incident detection (MTTD↓)*, *better customer experience (NPS proxy↑)*, and *leaner cost/GB* — with responsible AI baked in.
 
 ## Why this matters (business outcomes)
 - **MTTD↓:** Detect congestion/outages earlier via KPI trends & anomalies.
@@ -46,16 +46,30 @@ From a business perspective, this improvement translates into **meaningfully bet
 
 By combining predictive power with operational stability, **XGBoost was selected as the final model for deployment**, delivering both **risk reduction** and **growth opportunities** for NetworkIQ.
 
+## Deployment & Validation
 
-> This repo is structured for clean, interview‑ready artifacts (PRD, KPIs, model card) plus runnable code.
->
-> ## Quickstart (Windows)
-```powershell
-python -m venv .venv
-.\.venv\Scripts\activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-streamlit run streamlit_app.py
+- ✅ **Render Deployment:** The Streamlit dashboard is live-tested on Render. Diagnostics panel is hidden in production for security.
+- ✅ **Predictive Component:** Includes a congestion prediction engine (XGBoost baseline) with strong AUC/KS performance.
+- ✅ **AI Integration:** Connects predictive results to natural-language insights, making the dashboard accessible to technical and non-technical users.
+- ✅ **Map Visualization:** Interactive cell-site map overlays predictions with intuitive visuals.
+
+**Industry Validation:**  
+> Demoed to a telecom professional, who highlighted the **predictive accuracy, intuitive mapping, and AI integration** as standout features. This validated the tool’s cross-functional usability beyond data science teams.
+
+---
+
+## Multi-Cloud Roadmap
+
+Following Render, the app will be deployed to **Google Cloud Run** and **AWS App Runner** as part of a *“Build Once, Deploy Anywhere”* strategy:
+
+- **GCP Cloud Run:**  
+  - Free tier covers 2M requests/month → demo workloads are essentially cost-free.  
+  - Scales to zero → no idle charges.  
+- **AWS App Runner:**  
+  - Not part of AWS Free Tier → costs ~$5–25/month depending on usage.  
+  - Suitable for short-term demos (deploy, screenshot, delete).  
+
+This multi-cloud deployment demonstrates **portability, cost-awareness, and production alignment**.
 
 ## License
 MIT © 2025 Paulo Cavallo. See [LICENSE](LICENSE) for details.
