@@ -12,6 +12,7 @@ venv/
 data/curated/
 mlruns/
 .DS_Store
+!data/curated/parquet/**
 
 # Python packaging
 build/
