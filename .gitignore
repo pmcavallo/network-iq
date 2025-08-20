@@ -10,9 +10,9 @@ venv/
 
 # Data & artifacts
 data/curated/
+!data/curated/parquet/**
 mlruns/
 .DS_Store
-!data/curated/parquet/**
 
 # Python packaging
 build/
