@@ -1,0 +1,6 @@
+.git
+docs
+data/*.csv
+*.zip
+__pycache__/
+*.pyc
