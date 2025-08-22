@@ -71,5 +71,92 @@ Following Render, the app will be deployed to **Google Cloud Run** and **AWS App
 
 This multi-cloud deployment demonstrates **portability, cost-awareness, and production alignment**.
 
+## GCP: Cloud Run + GitHub Actions — Essentials (Narrative Guide)
+
+
+### 1) Goal at a glance
+- Serve the **Streamlit** app on a secure, autoscaling URL using **Cloud Run**.
+- Keep the **Gemini API key** out of source control with **Secret Manager**.
+- Add a **$10 budget** so experiments never surprise you.
+- Ship changes safely with a **GitHub Actions** workflow that builds and deploys on demand.
+
+---
+
+### 2) Prerequisites (one time)
+- Install the **Google Cloud CLI** and log in.
+- In `gcloud`, set **project** `networkiq` and **region** `us-central1`.
+- Enable the few services Cloud Run relies on: **Cloud Run**, **Cloud Build**, **Artifact Registry**, **Secret Manager**, and **Generative Language**.
+  - In the Console: *APIs & Services → Enable APIs* (search each)  
+  - Why: Cloud Run needs build + registry for images; Secret Manager for the key.
+
+---
+
+### 3) Secrets: where the Gemini key lives and why
+- Create a secret named **`google_api_key`** in **Secret Manager** and paste the Gemini key value.
+- Grant the **default compute service account** (the one Cloud Run uses) **Secret Manager → Secret Accessor** on that secret.
+- Why: the key never appears in Git, in build logs, or inside your image. Cloud Run pulls it at runtime only.
+
+---
+
+### 4) First deployment: prove it works end-to-end
+- From the machine, deploy the app **from source** to Cloud Run.
+  - Choose **Region:** `us-central1`, **Service name:** `networkiq`, and **Allow unauthenticated**.
+  - Under *Variables & Secrets*, **add secret**: map env **`GOOGLE_API_KEY`** to Secret Manager **`google_api_key` (latest)**.
+
+**Why a local “seed” deploy?**  
+It confirms buildpacks, networking, and secret access are correct before we automate everything with CI.
+
+---
+
+### 5) Tuning for cost + responsiveness
+- In the service settings, I set:
+  - **Min instances = 0** (scale to zero when idle, no baseline cost).
+  - **Max instances = 3** (reasonable upper bound while testing).
+  - **CPU/RAM** around **2 vCPU / 1 GiB** (safe defaults for Streamlit).
+  - **Concurrency ≈ 10** (let one instance serve a handful of users).
+- Why: predictable spend when idle, snappy enough under light load.
+
+---
+
+### 6) Budget guardrail ($10)
+
+- **Scope:** Project `networkiq` • **Amount:** $10 • **Alerts:** 50% / 90% / 100%  
+- Send notices to **billing admins** (and optionally project owners).
+- Why: an early warning system while I iterate.
+
+---
+
+### 7) CI/CD with GitHub Actions (how it fits together)
+**Actors and roles**
+- A dedicated **Deployer Service Account** in GCP: allowed to deploy to Cloud Run, trigger Cloud Build, push to Artifact Registry, read the secret, and act as a service account user.
+- **Cloud Build Service Account**: allowed to build/push and update Cloud Run during “deploy from source.”
+
+**Secrets in the GitHub repo**
+- Add **repository secrets**:
+  - `GCP_SA_KEY` — JSON key for the Deployer SA (create it once, paste contents, then delete the local file).
+  - `GCP_PROJECT` = `networkiq`
+  - `RUN_REGION` = `us-central1`
+  - `SERVICE_NAME` = `networkiq`
+
+**Workflow file**
+- Create `.github/workflows/deploy-cloudrun.yml` that:
+  1) Checks out code.  
+  2) Authenticates to GCP using `GCP_SA_KEY`.  
+  3) Runs `gcloud run deploy --source .` pointing at the project/region/service name.  
+  4) Injects `GOOGLE_API_KEY` from Secret Manager.
+
+**Why this design**
+- No Dockerfiles or registries to manage directly—Cloud Run from Source + Cloud Build does the heavy lifting.
+- Least-privilege access is explicit and auditable.
+---
+
+### What I now have
+- A production-style **Cloud Run** service with **runtime secrets** and **autoscaling**.
+- A **$10 budget** with alerts.
+- A clean **GitHub Actions** path to deploy updates safely, on demand.
+
+> Next step: mirror this approach on **AWS App Runner** (replace Secret Manager with AWS Secrets Manager and use a similar GitHub Actions job), so the same repository deploys multi-cloud with minimal changes.
+
+
 ## License
 MIT © 2025 Paulo Cavallo. See [LICENSE](LICENSE) for details.
