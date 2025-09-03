@@ -157,6 +157,42 @@ It confirms buildpacks, networking, and secret access are correct before we auto
 
 > Next step: mirror this approach on **AWS App Runner** (replace Secret Manager with AWS Secrets Manager and use a similar GitHub Actions job), so the same repository deploys multi-cloud with minimal changes.
 
+## Deploy on AWS (EC2 Free Tier)
+
+This repo includes a Dockerized Streamlit app. The fastest free-tier path is a single t3.micro EC2 running Docker.
+
+### Launch summary
+- AMI: Amazon Linux 2023
+- Instance: t3.micro (Free tier eligible)
+- Security Group: SSH 22 (My IP), HTTP 80 (0.0.0.0/0)
+- Dockerized app listens on port 8080; host maps 80→8080
+
+### First deploy (on the EC2 box)
+1) Install Docker & Git  
+   `sudo dnf -y update && sudo dnf -y install docker git && sudo usermod -aG docker ec2-user && sudo systemctl enable docker && sudo systemctl start docker && docker --version`
+2) Clone & build  
+   `cd ~ && git clone https://github.com/pmcavallo/network-iq.git && cd network-iq && docker build -t networkiq:latest .`
+3) Run  
+   `docker rm -f networkiq 2>/dev/null || true && docker run -d --restart unless-stopped --name networkiq -p 80:8080 -e PORT=8080 networkiq:latest`
+
+### Operate
+- Health check (from EC2): `curl -sI http://localhost | head -n 1`
+- Logs: `docker logs --tail 100 networkiq`
+- Restart: `docker restart networkiq`
+- Update after a new commit:  
+  `cd ~/network-iq && git pull --ff-only && docker build -t networkiq:latest . && docker rm -f networkiq && docker run -d --restart unless-stopped --name networkiq -p 80:8080 -e PORT=8080 networkiq:latest`
+- Reboot-safe: service uses `--restart unless-stopped` and Docker is `enabled`.
+
+### Cost guardrails (free tier)
+- I kept to one micro instance; stop when idle (Console → EC2 → Stop). EBS storage (8 GiB gp3) remains a few cents/month if left running all month.
+- Termination cleanup: terminate the instance and delete the volume if you don’t need it.
+
+### Optional S3 data (least privilege)
+Attach an instance role with read access to the bucket/prefix and set env var:
+`NETWORKIQ_S3_PATH=s3://aws-flagship-project/networkiq/data.csv`
+Use boto3 in app to read from S3 when the env var is present.
+
+
 
 ## License
 MIT © 2025 Paulo Cavallo. See [LICENSE](LICENSE) for details.
